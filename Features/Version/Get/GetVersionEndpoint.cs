@@ -29,10 +29,10 @@ namespace ConnectionsAPI.Features.Version.Get
 
             responseBuilder.Append("by Mate Farkas; ");
 
-            responseBuilder.AppendFormat("v{0}-{1}+{2};",
-                                         GitVersionInformation.MajorMinorPatch,
-                                         GitVersionInformation.ShortSha,
-                                         GitVersionInformation.EscapedBranchName);
+            var currentAsm = System.Reflection.Assembly.GetExecutingAssembly();
+            string asmVersion = currentAsm.GetName()?.Version?.ToString() ?? string.Empty;
+
+            responseBuilder.AppendFormat("v{0};", asmVersion);
 
             await SendStringAsync(responseBuilder.ToString(), cancellation: ct);
         }
