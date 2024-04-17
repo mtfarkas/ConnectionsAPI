@@ -215,7 +215,20 @@ namespace ConnectionsAPI.Utility
 
             // we iterate on every day between the start date and UTC tomorrow (this should handle +12 timezones as well)
             DateTime syncBeginDate = DateTime.ParseExact(startDate, SHORT_DATE, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).Date;
-            DateTime syncEndDate = DateTimeOffset.UtcNow.UtcDateTime.Date.AddDays(1);
+            DateTime syncEndDate;
+
+            // try to find the latest date that is currently going on in the world
+            TimeZoneInfo? latestTimezone = TimezoneUtility.GetLatestTimezoneOnSystem();
+            if (latestTimezone != null)
+            {
+                DateTime currentDateInLatestTimezone = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, latestTimezone);
+                syncEndDate = new DateTime(currentDateInLatestTimezone.Year, currentDateInLatestTimezone.Month, currentDateInLatestTimezone.Day, 0, 0, 0, DateTimeKind.Utc);
+            }
+            // default to UTC date + 1 day
+            else
+            {
+                syncEndDate = DateTime.UtcNow.Date.AddDays(1);
+            }
 
             foreach (var date in Enumerable.Repeat(0, Convert.ToInt32((syncEndDate - syncBeginDate).TotalDays)).Select((_, idx) => syncBeginDate.AddDays(idx + 1)))
             {
