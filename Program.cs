@@ -2,6 +2,7 @@ using ConnectionsAPI.Config;
 using ConnectionsAPI.Database;
 using ConnectionsAPI.Utility;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace ConnectionsAPI
 {
@@ -55,9 +56,25 @@ namespace ConnectionsAPI
                 app.UsePathBase("/connections-api");
             }
 
-            //app.UseHttpsRedirection();
-
             app.UseFastEndpoints();
+
+            // middleware to log requests and their resulting statuses
+            var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+            var requestLogger = loggerFactory.CreateLogger("ConnectionsAPI.RequestLogger");
+            app.Use(async (ctx, next) =>
+            {
+                await next();
+                if (ctx != null)
+                {
+                    // log the path and status of the request/response
+                    requestLogger.LogTrace(
+                        "{requestPath} -- {requestStatusCode} {requestStatusText}",
+                        ctx.Request.Path,
+                        ctx.Response.StatusCode,
+                        ((HttpStatusCode)ctx.Response.StatusCode).ToString()
+                    );
+                }
+            });
 
             // if not dev env, migrate database
             if (!app.Environment.IsDevelopment())
