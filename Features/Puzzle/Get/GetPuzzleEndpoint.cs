@@ -1,8 +1,7 @@
-﻿using ConnectionsAPI.Database;
+﻿using ConnectionsAPI.Database.Repository;
 using ConnectionsAPI.Models;
 using FluentValidation;
 using LazyCache;
-using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
 namespace ConnectionsAPI.Features.Puzzle.Get
@@ -22,15 +21,16 @@ namespace ConnectionsAPI.Features.Puzzle.Get
         }
     }
 
-    public class GetPuzzleEndpoint(ConnectionsContext db, ILogger<GetPuzzleEndpoint> logger, IAppCache cache) : Endpoint<GetPuzzleEndpointRequest, PuzzleDTO>
+    public class GetPuzzleEndpoint(PuzzleRepository puzzleRepo, ILogger<GetPuzzleEndpoint> logger, IAppCache cache) : Endpoint<GetPuzzleEndpointRequest, PuzzleDTO>
     {
-        private readonly ConnectionsContext _db = db;
+        private readonly PuzzleRepository _puzzleRepo = puzzleRepo;
         private readonly ILogger<GetPuzzleEndpoint> _logger = logger;
         private readonly IAppCache _cache = cache;
 
         public override void Configure()
         {
-            Get("/{PuzzleDate}.json");
+            Get("/{PuzzleDate}.json",
+                "/puzzle/{PuzzleDate}");
             AllowAnonymous();
             DontThrowIfValidationFails();
         }
@@ -45,39 +45,23 @@ namespace ConnectionsAPI.Features.Puzzle.Get
                 return;
             }
 
-            // get response from cache
-            var response = await _cache.GetOrAddAsync($"Puzzle:{req.PuzzleDate}",
-                                                      () => { return GetResponseForCache(req.PuzzleDate); },
-                                                      DateTimeOffset.UtcNow.AddMinutes(5));
+            bool hideSolutions = Query<bool>("hideSolutions", isRequired: false);
+
+            // query for the puzzle
+            var puzzle = await _puzzleRepo.GetPuzzleByDateAsync(req.PuzzleDate, includeSolutions: !hideSolutions);
 
             // if not found, done here
-            if (response == null)
+            if (puzzle == null)
             {
                 await SendNotFoundAsync(ct);
                 return;
             }
 
+            // get response from cache
+            var response = PuzzleDTO.FromEntity(puzzle);
+
             // done
             await SendAsync(response, cancellation: ct);
-        }
-
-        private async Task<PuzzleDTO?> GetResponseForCache(string printDate)
-        {
-            // query for the puzzle
-            var puzzle = await _db.Puzzles
-                .Include(x => x.Categories)
-                .ThenInclude(x => x.PuzzleCards)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.PrintDate == printDate);
-
-            // if not found, we're done here
-            if (puzzle == null)
-            {
-                return null;
-            }
-
-            // if found, map
-            return PuzzleDTO.FromEntity(puzzle);
         }
     }
 }

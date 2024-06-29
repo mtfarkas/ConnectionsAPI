@@ -1,43 +1,34 @@
-﻿using ConnectionsAPI.Database;
+﻿using ConnectionsAPI.Database.Repository;
 using ConnectionsAPI.Models;
 using LazyCache;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConnectionsAPI.Features.Puzzle.List
 {
-    public class ListPuzzlesEndpoint(ConnectionsContext db, IAppCache cache) : EndpointWithoutRequest<ICollection<PuzzleDTO>>
+    public class ListPuzzlesEndpoint(PuzzleRepository puzzleRepo, IAppCache cache) : EndpointWithoutRequest<ICollection<PuzzleDTO>>
     {
-        private readonly ConnectionsContext _db = db;
+        private readonly PuzzleRepository _puzzleRepo = puzzleRepo;
         private readonly IAppCache _cache = cache;
 
         public override void Configure()
         {
-            Get("/all.json");
+            Get("/all.json",
+                "/puzzle/all");
             AllowAnonymous();
         }
 
         public override async Task HandleAsync(CancellationToken ct)
         {
-            // get response from cache
-            var response = await _cache.GetOrAddAsync("Puzzle:All",
-                                                      GetResponseForCache,
-                                                      DateTimeOffset.UtcNow.AddMinutes(5));
+            bool hideSolutions = Query<bool>("hideSolutions", isRequired: false);
+
+            // query all, ordered by print date
+            var puzzles = await _puzzleRepo.GetAllPuzzlesAsync(includeSolutions: !hideSolutions);
+
+            // map to response object
+            var response = puzzles.Select(PuzzleDTO.FromEntity).ToList();
+
             // done
             await SendAsync(response, cancellation: ct);
-        }
-
-        private async Task<ICollection<PuzzleDTO>> GetResponseForCache()
-        {
-            // query all, ordered by print date
-            var puzzles = await _db.Puzzles
-                .Include(x => x.Categories)
-                .ThenInclude(x => x.PuzzleCards)
-                .AsNoTracking()
-                .OrderBy(x => x.PrintDate)
-                .ToListAsync();
-
-            // map to dto
-            return puzzles.Select(PuzzleDTO.FromEntity).ToList();
         }
     }
 }

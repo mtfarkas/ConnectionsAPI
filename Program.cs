@@ -1,5 +1,6 @@
 using ConnectionsAPI.Config;
 using ConnectionsAPI.Database;
+using ConnectionsAPI.Database.Repository;
 using ConnectionsAPI.Utility;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -8,6 +9,8 @@ namespace ConnectionsAPI
 {
     public class Program
     {
+        const string CorsPolicyName = "DefaultCorsPolicy";
+
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -36,7 +39,20 @@ namespace ConnectionsAPI
 
             builder.Services.AddLazyCache();
 
+            builder.Services.AddScoped<PuzzleRepository>();
+
             builder.Services.AddHostedService<SyncScheduler>();
+
+            // configure clors
+            builder.Services.AddCors(config =>
+            {
+                config.AddPolicy(CorsPolicyName, policy =>
+                {
+                    policy.AllowAnyOrigin();
+                    policy.AllowAnyHeader();
+                    policy.WithMethods("GET");
+                });
+            });
 
             var app = builder.Build();
 
@@ -87,6 +103,9 @@ namespace ConnectionsAPI
                     logger.LogInformation("Migration finished");
                 }
             }
+
+            // enable cors
+            app.UseCors(CorsPolicyName);
 
             app.Run();
         }

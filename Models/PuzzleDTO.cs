@@ -8,12 +8,18 @@
                 PuzzleNumber = dbPuzzle.Index,
                 PrintDate = dbPuzzle.PrintDate,
                 Editor = dbPuzzle.EditorName,
-                Categories = dbPuzzle.Categories.OrderBy(x => (int)x.Color).Select(PuzzleCategoryDTO.FromEntity).ToList()
+
+                NextPuzzle = dbPuzzle.NextPrintDate ?? string.Empty,
+                PreviousPuzzle = dbPuzzle.PrevPrintDate ?? string.Empty,
+
+                Categories = dbPuzzle.Categories.OrderBy(x => (int)x.Color).Select(PuzzleCategoryDTO.FromEntity).ToList(),
             };
 
         public int PuzzleNumber { get; set; }
         public string PrintDate { get; set; } = string.Empty;
-        public string Editor { get; set;} = string.Empty;
+        public string PreviousPuzzle { get; set; } = string.Empty;
+        public string NextPuzzle { get; set; } = string.Empty;
+        public string Editor { get; set; } = string.Empty;
         public ICollection<PuzzleCategoryDTO> Categories { get; set; } = [];
     }
 

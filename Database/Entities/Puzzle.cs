@@ -1,4 +1,6 @@
-﻿namespace ConnectionsAPI.Database.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ConnectionsAPI.Database.Entities
 {
     public class Puzzle
     {
@@ -36,5 +38,10 @@
         /// The categories associated with this puzzle
         /// </summary>
         public virtual ICollection<PuzzleCategory> Categories { get; set; } = [];
+
+        [NotMapped]
+        public string? PrevPrintDate { get; set; }
+        [NotMapped]
+        public string? NextPrintDate { get; set; }
     }
 }
