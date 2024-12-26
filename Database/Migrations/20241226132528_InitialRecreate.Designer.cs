@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ConnectionsAPI.Database.Migrations
 {
     [DbContext(typeof(ConnectionsContext))]
-    [Migration("20241226082514_RenameCategoriesPuzzles")]
-    partial class RenameCategoriesPuzzles
+    [Migration("20241226132528_InitialRecreate")]
+    partial class InitialRecreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,13 +20,13 @@ namespace ConnectionsAPI.Database.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
 
-            modelBuilder.Entity("ConnectionsAPI.Database.Entities.CategoriesCard", b =>
+            modelBuilder.Entity("ConnectionsAPI.Database.Entities.ConnectionsCard", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CategoriesCategoryId")
+                    b.Property<int>("ConnectionsCategoryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Content")
@@ -38,21 +38,21 @@ namespace ConnectionsAPI.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoriesCategoryId");
+                    b.HasIndex("ConnectionsCategoryId");
 
-                    b.ToTable("CategoriesCard");
+                    b.ToTable("ConnectionsCard");
                 });
 
-            modelBuilder.Entity("ConnectionsAPI.Database.Entities.CategoriesCategory", b =>
+            modelBuilder.Entity("ConnectionsAPI.Database.Entities.ConnectionsCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CategoriesPuzzleId")
+                    b.Property<int>("Color")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Color")
+                    b.Property<int>("ConnectionsPuzzleId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -61,12 +61,12 @@ namespace ConnectionsAPI.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoriesPuzzleId");
+                    b.HasIndex("ConnectionsPuzzleId");
 
-                    b.ToTable("CategoriesCategory");
+                    b.ToTable("ConnectionsCategory");
                 });
 
-            modelBuilder.Entity("ConnectionsAPI.Database.Entities.CategoriesPuzzle", b =>
+            modelBuilder.Entity("ConnectionsAPI.Database.Entities.ConnectionsPuzzle", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,37 +95,37 @@ namespace ConnectionsAPI.Database.Migrations
                     b.HasIndex("PrintDate")
                         .IsUnique();
 
-                    b.ToTable("CategoriesPuzzles");
+                    b.ToTable("ConnectionsPuzzles");
                 });
 
-            modelBuilder.Entity("ConnectionsAPI.Database.Entities.CategoriesCard", b =>
+            modelBuilder.Entity("ConnectionsAPI.Database.Entities.ConnectionsCard", b =>
                 {
-                    b.HasOne("ConnectionsAPI.Database.Entities.CategoriesCategory", "Category")
-                        .WithMany("CategoriesPuzzleCards")
-                        .HasForeignKey("CategoriesCategoryId")
+                    b.HasOne("ConnectionsAPI.Database.Entities.ConnectionsCategory", "Category")
+                        .WithMany("Cards")
+                        .HasForeignKey("ConnectionsCategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("ConnectionsAPI.Database.Entities.CategoriesCategory", b =>
+            modelBuilder.Entity("ConnectionsAPI.Database.Entities.ConnectionsCategory", b =>
                 {
-                    b.HasOne("ConnectionsAPI.Database.Entities.CategoriesPuzzle", "CategoriesPuzzle")
+                    b.HasOne("ConnectionsAPI.Database.Entities.ConnectionsPuzzle", "ConnectionsPuzzle")
                         .WithMany("Categories")
-                        .HasForeignKey("CategoriesPuzzleId")
+                        .HasForeignKey("ConnectionsPuzzleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CategoriesPuzzle");
+                    b.Navigation("ConnectionsPuzzle");
                 });
 
-            modelBuilder.Entity("ConnectionsAPI.Database.Entities.CategoriesCategory", b =>
+            modelBuilder.Entity("ConnectionsAPI.Database.Entities.ConnectionsCategory", b =>
                 {
-                    b.Navigation("CategoriesPuzzleCards");
+                    b.Navigation("Cards");
                 });
 
-            modelBuilder.Entity("ConnectionsAPI.Database.Entities.CategoriesPuzzle", b =>
+            modelBuilder.Entity("ConnectionsAPI.Database.Entities.ConnectionsPuzzle", b =>
                 {
                     b.Navigation("Categories");
                 });

@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ConnectionsAPI.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialRecreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Puzzles",
+                name: "ConnectionsPuzzles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -25,64 +25,64 @@ namespace ConnectionsAPI.Database.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Puzzles", x => x.Id);
+                    table.PrimaryKey("PK_ConnectionsPuzzles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PuzzleCategory",
+                name: "ConnectionsCategory",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Color = table.Column<int>(type: "INTEGER", nullable: false),
-                    PuzzleId = table.Column<int>(type: "INTEGER", nullable: false)
+                    ConnectionsPuzzleId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PuzzleCategory", x => x.Id);
+                    table.PrimaryKey("PK_ConnectionsCategory", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PuzzleCategory_Puzzles_PuzzleId",
-                        column: x => x.PuzzleId,
-                        principalTable: "Puzzles",
+                        name: "FK_ConnectionsCategory_ConnectionsPuzzles_ConnectionsPuzzleId",
+                        column: x => x.ConnectionsPuzzleId,
+                        principalTable: "ConnectionsPuzzles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PuzzleCard",
+                name: "ConnectionsCard",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Content = table.Column<string>(type: "TEXT", nullable: false),
                     Position = table.Column<int>(type: "INTEGER", nullable: false),
-                    PuzzleCategoryId = table.Column<int>(type: "INTEGER", nullable: false)
+                    ConnectionsCategoryId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PuzzleCard", x => x.Id);
+                    table.PrimaryKey("PK_ConnectionsCard", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PuzzleCard_PuzzleCategory_PuzzleCategoryId",
-                        column: x => x.PuzzleCategoryId,
-                        principalTable: "PuzzleCategory",
+                        name: "FK_ConnectionsCard_ConnectionsCategory_ConnectionsCategoryId",
+                        column: x => x.ConnectionsCategoryId,
+                        principalTable: "ConnectionsCategory",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PuzzleCard_PuzzleCategoryId",
-                table: "PuzzleCard",
-                column: "PuzzleCategoryId");
+                name: "IX_ConnectionsCard_ConnectionsCategoryId",
+                table: "ConnectionsCard",
+                column: "ConnectionsCategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PuzzleCategory_PuzzleId",
-                table: "PuzzleCategory",
-                column: "PuzzleId");
+                name: "IX_ConnectionsCategory_ConnectionsPuzzleId",
+                table: "ConnectionsCategory",
+                column: "ConnectionsPuzzleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Puzzles_PrintDate",
-                table: "Puzzles",
+                name: "IX_ConnectionsPuzzles_PrintDate",
+                table: "ConnectionsPuzzles",
                 column: "PrintDate",
                 unique: true);
         }
@@ -91,13 +91,13 @@ namespace ConnectionsAPI.Database.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PuzzleCard");
+                name: "ConnectionsCard");
 
             migrationBuilder.DropTable(
-                name: "PuzzleCategory");
+                name: "ConnectionsCategory");
 
             migrationBuilder.DropTable(
-                name: "Puzzles");
+                name: "ConnectionsPuzzles");
         }
     }
 }
