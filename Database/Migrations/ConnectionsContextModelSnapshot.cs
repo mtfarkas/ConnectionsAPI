@@ -23,10 +23,7 @@ namespace ConnectionsAPI.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CategoriesCategoryId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("CategoryId")
+                    b.Property<int>("ConnectionsCategoryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Content")
@@ -38,7 +35,7 @@ namespace ConnectionsAPI.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("ConnectionsCategoryId");
 
                     b.ToTable("ConnectionsCard");
                 });
@@ -102,7 +99,9 @@ namespace ConnectionsAPI.Database.Migrations
                 {
                     b.HasOne("ConnectionsAPI.Database.Entities.ConnectionsCategory", "Category")
                         .WithMany("Cards")
-                        .HasForeignKey("CategoryId");
+                        .HasForeignKey("ConnectionsCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Category");
                 });
