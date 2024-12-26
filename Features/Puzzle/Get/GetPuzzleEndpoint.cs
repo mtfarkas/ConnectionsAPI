@@ -21,7 +21,7 @@ namespace ConnectionsAPI.Features.Puzzle.Get
         }
     }
 
-    public class GetPuzzleEndpoint(PuzzleRepository puzzleRepo, ILogger<GetPuzzleEndpoint> logger, IAppCache cache) : Endpoint<GetPuzzleEndpointRequest, PuzzleDTO>
+    public class GetPuzzleEndpoint(PuzzleRepository puzzleRepo, ILogger<GetPuzzleEndpoint> logger, IAppCache cache) : Endpoint<GetPuzzleEndpointRequest, ConnectionsPuzzleDTO>
     {
         private readonly PuzzleRepository _puzzleRepo = puzzleRepo;
         private readonly ILogger<GetPuzzleEndpoint> _logger = logger;
@@ -58,7 +58,7 @@ namespace ConnectionsAPI.Features.Puzzle.Get
             }
 
             // get response from cache
-            var response = PuzzleDTO.FromEntity(puzzle);
+            var response = ConnectionsPuzzleDTO.FromEntity(puzzle);
 
             // done
             await SendAsync(response, cancellation: ct);

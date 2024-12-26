@@ -1,23 +1,22 @@
 ﻿using ConnectionsAPI.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace ConnectionsAPI.Database
+namespace ConnectionsAPI.Database;
+public class ConnectionsContext(DbContextOptions<ConnectionsContext> dbContextOptions) : DbContext(dbContextOptions)
 {
-    public class ConnectionsContext(DbContextOptions<ConnectionsContext> dbContextOptions) : DbContext(dbContextOptions)
+    public required DbSet<ConnectionsPuzzle> ConnectionsPuzzles { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        public DbSet<CategoriesPuzzle> CategoriesPuzzles { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<CategoriesPuzzle>()
-                .HasIndex(x => x.PrintDate).IsUnique();
-            modelBuilder.Entity<CategoriesPuzzle>()
-                .Ignore(x => x.NextPrintDate);
-            modelBuilder.Entity<CategoriesPuzzle>()
-                .Ignore(x => x.PrevPrintDate);
+        modelBuilder.Entity<ConnectionsPuzzle>()
+            .HasIndex(x => x.PrintDate).IsUnique();
+        modelBuilder.Entity<ConnectionsPuzzle>()
+            .Ignore(x => x.NextPrintDate);
+        modelBuilder.Entity<ConnectionsPuzzle>()
+            .Ignore(x => x.PrevPrintDate);
 
 
-            base.OnModelCreating(modelBuilder);
-        }
+        base.OnModelCreating(modelBuilder);
     }
 }
+

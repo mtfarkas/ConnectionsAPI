@@ -56,7 +56,7 @@ namespace ConnectionsAPI
         }
 
         private static Task SendSyncEvent(CancellationToken stoppingToken, bool wait = false) =>
-            new PuzzleSyncEvent { }.PublishAsync(wait ? Mode.WaitForAll : Mode.WaitForNone, stoppingToken);
+            new ConnectionsSyncEvent { }.PublishAsync(wait ? Mode.WaitForAll : Mode.WaitForNone, stoppingToken);
 
         private async Task WaitForNextSchedule(CronExpression cron, CancellationToken ct)
         {

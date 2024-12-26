@@ -1,8 +1,8 @@
 ﻿namespace ConnectionsAPI.Models
 {
-    public class PuzzleDTO
+    public class ConnectionsPuzzleDTO
     {
-        public static PuzzleDTO FromEntity(Database.Entities.CategoriesPuzzle dbPuzzle) =>
+        public static ConnectionsPuzzleDTO FromEntity(Database.Entities.ConnectionsPuzzle dbPuzzle) =>
             new()
             {
                 PuzzleNumber = dbPuzzle.Index,
@@ -25,11 +25,11 @@
 
     public class PuzzleCategoryDTO
     {
-        public static PuzzleCategoryDTO FromEntity(Database.Entities.CategoriesCategory dbCategory) =>
+        public static PuzzleCategoryDTO FromEntity(Database.Entities.ConnectionsCategory dbCategory) =>
             new()
             {
                 Title = dbCategory.Name,
-                Cards = dbCategory.CategoriesPuzzleCards.OrderBy(x => x.Content).Select(PuzzleCardDTO.FromEntity).ToList(),
+                Cards = dbCategory.Cards.OrderBy(x => x.Content).Select(PuzzleCardDTO.FromEntity).ToList(),
                 Color = dbCategory.Color.ToString().ToLower(),
                 OrderingKey = (int)dbCategory.Color
             };
@@ -42,7 +42,7 @@
 
     public class PuzzleCardDTO
     {
-        public static PuzzleCardDTO FromEntity(Database.Entities.CategoriesCard dbCard) =>
+        public static PuzzleCardDTO FromEntity(Database.Entities.ConnectionsCard dbCard) =>
             new()
             {
                 Content = dbCard.Content,

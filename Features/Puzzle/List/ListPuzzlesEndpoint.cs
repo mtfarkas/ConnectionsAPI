@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ConnectionsAPI.Features.Puzzle.List
 {
-    public class ListPuzzlesEndpoint(PuzzleRepository puzzleRepo, IAppCache cache) : EndpointWithoutRequest<ICollection<PuzzleDTO>>
+    public class ListPuzzlesEndpoint(PuzzleRepository puzzleRepo, IAppCache cache) : EndpointWithoutRequest<ICollection<ConnectionsPuzzleDTO>>
     {
         private readonly PuzzleRepository _puzzleRepo = puzzleRepo;
         private readonly IAppCache _cache = cache;
@@ -25,7 +25,7 @@ namespace ConnectionsAPI.Features.Puzzle.List
             var puzzles = await _puzzleRepo.GetAllPuzzlesAsync(includeSolutions: !hideSolutions);
 
             // map to response object
-            var response = puzzles.Select(PuzzleDTO.FromEntity).ToList();
+            var response = puzzles.Select(ConnectionsPuzzleDTO.FromEntity).ToList();
 
             // done
             await SendAsync(response, cancellation: ct);
