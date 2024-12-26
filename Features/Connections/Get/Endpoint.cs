@@ -17,7 +17,7 @@ public class GetConnectionsEndpoint(PuzzleRepository _puzzleRepo) : Endpoint<Get
     bool hideSolutions = Query<bool>("hideSolutions", isRequired: false);
 
     // query for the puzzle
-    var puzzle = await _puzzleRepo.GetPuzzleByDateAsync(req.PrintDate, includeSolutions: !hideSolutions);
+    var puzzle = await _puzzleRepo.GetConnectionsByDateAsync(req.PrintDate, includeSolutions: !hideSolutions);
 
     // if not found, done here
     if (puzzle == null)

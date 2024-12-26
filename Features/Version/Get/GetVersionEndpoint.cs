@@ -1,40 +1,38 @@
 ﻿
 using System.Text;
 
-namespace ConnectionsAPI.Features.Version.Get
+namespace ConnectionsAPI.Features.Version.Get;
+public class GetVersionEndpoint : EndpointWithoutRequest<string>
 {
-    public class GetVersionEndpoint : EndpointWithoutRequest<string>
+    private static readonly int START_YEAR = 2024;
+
+    public override void Configure()
     {
-        private static readonly int START_YEAR = 2024;
+        Get("/version");
+        AllowAnonymous();
+    }
 
-        public override void Configure()
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        StringBuilder responseBuilder = new();
+
+        responseBuilder.Append("ConnectionsAPI ©");
+        if (DateTime.UtcNow.Year != START_YEAR)
         {
-            Get("/version");
-            AllowAnonymous();
+            responseBuilder.AppendFormat("{0} - {1}; ", START_YEAR, DateTime.UtcNow.Year);
+        }
+        else
+        {
+            responseBuilder.AppendFormat("{0}; ", DateTime.UtcNow.Year);
         }
 
-        public override async Task HandleAsync(CancellationToken ct)
-        {
-            StringBuilder responseBuilder = new();
+        responseBuilder.Append("by Mate Farkas; ");
 
-            responseBuilder.Append("ConnectionsAPI ©");
-            if (DateTime.UtcNow.Year != START_YEAR)
-            {
-                responseBuilder.AppendFormat("{0} - {1}; ", START_YEAR, DateTime.UtcNow.Year);
-            }
-            else
-            {
-                responseBuilder.AppendFormat("{0}; ", DateTime.UtcNow.Year);
-            }
+        var currentAsm = System.Reflection.Assembly.GetExecutingAssembly();
+        string asmVersion = currentAsm.GetName()?.Version?.ToString() ?? string.Empty;
 
-            responseBuilder.Append("by Mate Farkas; ");
+        responseBuilder.AppendFormat("v{0};", asmVersion);
 
-            var currentAsm = System.Reflection.Assembly.GetExecutingAssembly();
-            string asmVersion = currentAsm.GetName()?.Version?.ToString() ?? string.Empty;
-
-            responseBuilder.AppendFormat("v{0};", asmVersion);
-
-            await SendStringAsync(responseBuilder.ToString(), cancellation: ct);
-        }
+        await SendStringAsync(responseBuilder.ToString(), cancellation: ct);
     }
 }

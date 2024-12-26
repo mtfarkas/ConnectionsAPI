@@ -7,7 +7,7 @@ public class PuzzleRepository(ConnectionsContext _db)
 {
     private readonly ConnectionsContext _db = _db;
 
-    public async Task<ConnectionsPuzzle?> GetPuzzleByDateAsync(string printDate, bool includeSolutions = true)
+    public async Task<ConnectionsPuzzle?> GetConnectionsByDateAsync(string printDate, bool includeSolutions = true)
     {
         // query for the puzzle
         var query = _db.ConnectionsPuzzles.AsNoTracking();
@@ -27,12 +27,12 @@ public class PuzzleRepository(ConnectionsContext _db)
             return null;
         }
 
-        await EnhancePuzzleWithDatesAsync(puzzle);
+        await EnhanceConnectionsWithDatesAsync(puzzle);
 
         return puzzle;
     }
 
-    public async Task<IEnumerable<ConnectionsPuzzle>> GetAllPuzzlesAsync(bool includeSolutions = true)
+    public async Task<IEnumerable<ConnectionsPuzzle>> GetAllConnectionsAsync(bool includeSolutions = true)
     {
         // query all, ordered by print date
         var query = _db.ConnectionsPuzzles
@@ -49,13 +49,13 @@ public class PuzzleRepository(ConnectionsContext _db)
 
         foreach (var puzzle in result)
         {
-            await EnhancePuzzleWithDatesAsync(puzzle);
+            await EnhanceConnectionsWithDatesAsync(puzzle);
         }
 
         return result;
     }
 
-    private async Task EnhancePuzzleWithDatesAsync(ConnectionsPuzzle puzzle)
+    private async Task EnhanceConnectionsWithDatesAsync(ConnectionsPuzzle puzzle)
     {
         string? previousPuzzleDate = await _db.ConnectionsPuzzles.AsNoTracking()
             .Where(x => x.PrintDate.CompareTo(puzzle.PrintDate) < 0)
