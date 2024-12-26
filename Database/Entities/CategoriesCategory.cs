@@ -1,6 +1,6 @@
 ﻿namespace ConnectionsAPI.Database.Entities
 {
-    public class PuzzleCategory
+    public class CategoriesCategory
     {
         /// <summary>
         /// Primary key of the entity
@@ -15,21 +15,21 @@
         /// <summary>
         /// The color of the category in this Connections puzzle; Also used for sorting
         /// </summary>
-        public PuzzleCategoryColor Color { get; set; }
+        public CategoriesColor Color { get; set; }
 
         /// <summary>
         /// The ID of the associated Connections puzzle
         /// </summary>
-        public int PuzzleId { get; set; }
-        
+        public int CategoriesPuzzleId { get; set; }
+
         /// <summary>
         /// The associated puzzle instance
         /// </summary>
-        public virtual Puzzle? Puzzle { get; set; }
+        public virtual CategoriesPuzzle? CategoriesPuzzle { get; set; }
 
         /// <summary>
         /// The cards associated with this category
         /// </summary>
-        public ICollection<PuzzleCard> PuzzleCards { get; set; } = [];
+        public ICollection<CategoriesCard> CategoriesPuzzleCards { get; set; } = [];
     }
 }

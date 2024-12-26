@@ -1,12 +1,12 @@
 ﻿namespace ConnectionsAPI.Database.Entities
 {
-    public class PuzzleCard
+    public class CategoriesCard
     {
         /// <summary>
         /// Primary key of the entity
         /// </summary>
         public int Id { get; set; }
-        
+
         /// <summary>
         /// The contents of this card (the word)
         /// </summary>
@@ -20,11 +20,11 @@
         /// <summary>
         /// The ID of the associated Connections category
         /// </summary>
-        public int PuzzleCategoryId { get; set; }
+        public int CategoriesCategoryId { get; set; }
 
         /// <summary>
         /// The associated category instance
         /// </summary>
-        public virtual PuzzleCategory? PuzzleCategory { get; set; }
+        public virtual CategoriesCategory? Category { get; set; }
     }
 }

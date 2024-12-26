@@ -21,6 +21,9 @@ namespace ConnectionsAPI.Utility
             public string Editor { get; set; } = string.Empty;
             [JsonPropertyName("categories")]
             public IReadOnlyList<NYTConnectionsPuzzleCategory> Categories { get; set; } = [];
+
+            [JsonIgnore]
+            public string Md5 { get; set; } = string.Empty;
         }
 
         class NYTConnectionsPuzzleCategory
@@ -59,13 +62,26 @@ namespace ConnectionsAPI.Utility
             ConcurrentDictionary<string, string> responses = new();
             foreach (var batch in syncDates.Chunk(5))
             {
+                ConcurrentBag<NYTConnectionsPuzzle> batchPuzzles = [];
                 await Task.WhenAll(
                     batch.Select(x => GetConnectionsResponseAsync(x, ct).ContinueWith(t =>
                     {
                         string? result = t.Result;
                         if (!string.IsNullOrWhiteSpace(result))
                         {
-                            responses.TryAdd(x, result);
+                            try
+                            {
+                                var nytResponseJson = JsonSerializer.Deserialize<NYTConnectionsPuzzle>(result)
+                                    ?? throw new InvalidDataException("Connections response deserialized to null");
+
+                                string md5 = HashUtility.CalculateMD5(result);
+                                nytResponseJson.Md5 = md5;
+                                batchPuzzles.Add(nytResponseJson);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Failed to deserialize Connections response for {date}", x);
+                            }
                         }
                         else
                         {
@@ -73,59 +89,44 @@ namespace ConnectionsAPI.Utility
                         }
                     }))
                 );
-            }
 
-            // process the response data
-            foreach (var response in responses.Select(kvp => new { PrintDate = kvp.Key, JsonContent = kvp.Value })
-                                              .OrderBy(x => x.PrintDate))
-            {
-                _logger.LogInformation("Processing puzzle data for {printDate}", response.PrintDate);
-                await UpsertPuzzleDataAsync(response.PrintDate, response.JsonContent);
+                foreach (var puzzle in batchPuzzles.OrderBy(x => x.PrintDate))
+                {
+                    await UpsertPuzzleDataAsync(puzzle);
+                }
+                await _db.SaveChangesAsync(ct);
             }
-
-            await _db.SaveChangesAsync(ct);
         }
 
-        private async Task UpsertPuzzleDataAsync(string printDate, string puzzleJson)
+        private async Task UpsertPuzzleDataAsync(NYTConnectionsPuzzle nytPuzzle)
         {
-            // check if JSON is valid
-            NYTConnectionsPuzzle? nytPuzzle = JsonSerializer.Deserialize<NYTConnectionsPuzzle>(puzzleJson);
-            if (nytPuzzle == null || nytPuzzle.Status != "OK")
-            {
-                _logger.LogError("JSON content for {printDate} failed to deserialize or status not OK", printDate);
-                return;
-            }
-
-            // calculate JSON content hash for change detection
-            string jsonMD5 = HashUtility.CalculateMD5(puzzleJson);
-
             // get a tracking reference to the puzzle matching by print date, either by querying or creating a new entity
-            var puzzle = await _db.Puzzles
+            var puzzle = await _db.CategoriesPuzzles
                 .Include(x => x.Categories)
-                .ThenInclude(x => x.PuzzleCards)
-                .FirstOrDefaultAsync(x => x.PrintDate == printDate);
+                .ThenInclude(x => x.CategoriesPuzzleCards)
+                .FirstOrDefaultAsync(x => x.PrintDate == nytPuzzle.PrintDate);
             if (puzzle == null)
             {
-                _logger.LogTrace("No puzzle found for {printDate}, puzzle will be created", printDate);
-                puzzle = new Database.Entities.Puzzle
+                _logger.LogTrace("No puzzle found for {printDate}, puzzle will be created", nytPuzzle.PrintDate);
+                puzzle = new Database.Entities.CategoriesPuzzle
                 {
                     Categories = [],
                     CreatedDate = DateTime.UtcNow
                 };
-                _db.Puzzles.Add(puzzle);
+                _db.CategoriesPuzzles.Add(puzzle);
             }
 
             // if the content hash matches, no update needed
-            if (puzzle.ContentMD5 == jsonMD5)
+            if (puzzle.ContentMD5 == nytPuzzle.Md5)
             {
-                _logger.LogTrace("JSON content hash for {printDate} matches, no need for update", printDate);
+                _logger.LogTrace("JSON content hash for {printDate} matches, no need for update", nytPuzzle.PrintDate);
                 return;
             }
 
-            puzzle.ContentMD5 = jsonMD5;
-            puzzle.PrintDate = printDate;
+            puzzle.ContentMD5 = nytPuzzle.Md5;
+            puzzle.PrintDate = nytPuzzle.PrintDate;
             puzzle.EditorName = nytPuzzle.Editor;
-            puzzle.Index = CalculateConnectionsDayIndex(printDate);
+            puzzle.Index = CalculateConnectionsDayIndex(nytPuzzle.PrintDate);
             puzzle.Categories ??= [];
 
             // mark items for deletion and also remove them from here to be readded
@@ -136,23 +137,23 @@ namespace ConnectionsAPI.Utility
             int idx = 1;
             foreach (var nytCategory in nytPuzzle.Categories)
             {
-                PuzzleCategory category = new()
+                CategoriesCategory category = new()
                 {
-                    Color = (PuzzleCategoryColor)idx++,
+                    Color = (CategoriesColor)idx++,
                     Name = nytCategory.Title,
-                    Puzzle = puzzle,
-                    PuzzleCards = []
+                    CategoriesPuzzle = puzzle,
+                    CategoriesPuzzleCards = []
                 };
 
                 foreach (var nytCard in nytCategory.Cards)
                 {
-                    PuzzleCard card = new()
+                    CategoriesCard card = new()
                     {
                         Content = nytCard.Content,
                         Position = nytCard.Position,
-                        PuzzleCategory = category,
+                        Category = category,
                     };
-                    category.PuzzleCards.Add(card);
+                    category.CategoriesPuzzleCards.Add(card);
                 }
 
                 puzzle.Categories.Add(category);
@@ -181,7 +182,7 @@ namespace ConnectionsAPI.Utility
         private async Task<IReadOnlyList<string>> GetSyncDatesAsync(CancellationToken ct)
         {
             // query the last puzzle we have in the database
-            string? lastSyncedPuzzleDate = await _db.Puzzles.AsNoTracking()
+            string? lastSyncedPuzzleDate = await _db.CategoriesPuzzles.AsNoTracking()
                 .OrderByDescending(x => x.PrintDate)
                 .Select(x => x.PrintDate)
                 .FirstOrDefaultAsync(cancellationToken: ct);

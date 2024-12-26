@@ -1,6 +1,6 @@
 ﻿namespace ConnectionsAPI.Database.Entities
 {
-    public enum PuzzleCategoryColor
+    public enum CategoriesColor
     {
         Yellow = 1,
         Green = 2,

@@ -7,16 +7,16 @@ namespace ConnectionsAPI.Database.Repository
     {
         private readonly ConnectionsContext _db = _db;
 
-        public async Task<Puzzle?> GetPuzzleByDateAsync(string printDate, bool includeSolutions = true)
+        public async Task<CategoriesPuzzle?> GetPuzzleByDateAsync(string printDate, bool includeSolutions = true)
         {
             // query for the puzzle
-            var query = _db.Puzzles.AsNoTracking();
+            var query = _db.CategoriesPuzzles.AsNoTracking();
 
             if (includeSolutions)
             {
                 query = query
                     .Include(x => x.Categories)
-                    .ThenInclude(x => x.PuzzleCards);
+                    .ThenInclude(x => x.CategoriesPuzzleCards);
             }
 
             var puzzle = await query.FirstOrDefaultAsync(x => x.PrintDate == printDate);
@@ -32,17 +32,17 @@ namespace ConnectionsAPI.Database.Repository
             return puzzle;
         }
 
-        public async Task<IEnumerable<Puzzle>> GetAllPuzzlesAsync(bool includeSolutions = true)
+        public async Task<IEnumerable<CategoriesPuzzle>> GetAllPuzzlesAsync(bool includeSolutions = true)
         {
             // query all, ordered by print date
-            var query = _db.Puzzles
+            var query = _db.CategoriesPuzzles
                 .AsNoTracking();
 
             if (includeSolutions)
             {
                 query = query
                     .Include(x => x.Categories)
-                    .ThenInclude(x => x.PuzzleCards);
+                    .ThenInclude(x => x.CategoriesPuzzleCards);
             }
 
             var result = (await query.OrderBy(x => x.PrintDate).ToListAsync()) ?? [];
@@ -55,15 +55,15 @@ namespace ConnectionsAPI.Database.Repository
             return result;
         }
 
-        private async Task EnhancePuzzleWithDatesAsync(Puzzle puzzle)
+        private async Task EnhancePuzzleWithDatesAsync(CategoriesPuzzle puzzle)
         {
-            string? previousPuzzleDate = await _db.Puzzles.AsNoTracking()
+            string? previousPuzzleDate = await _db.CategoriesPuzzles.AsNoTracking()
                 .Where(x => x.PrintDate.CompareTo(puzzle.PrintDate) < 0)
                 .OrderByDescending(x => x.PrintDate)
                 .Select(x => x.PrintDate)
                 .FirstOrDefaultAsync();
 
-            string? nextPuzzleDate = await _db.Puzzles.AsNoTracking()
+            string? nextPuzzleDate = await _db.CategoriesPuzzles.AsNoTracking()
                 .Where(x => x.PrintDate.CompareTo(puzzle.PrintDate) > 0)
                 .OrderBy(x => x.PrintDate)
                 .Select(x => x.PrintDate)

@@ -5,15 +5,15 @@ namespace ConnectionsAPI.Database
 {
     public class ConnectionsContext(DbContextOptions<ConnectionsContext> dbContextOptions) : DbContext(dbContextOptions)
     {
-        public DbSet<Puzzle> Puzzles { get; set; }
+        public DbSet<CategoriesPuzzle> CategoriesPuzzles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Puzzle>()
+            modelBuilder.Entity<CategoriesPuzzle>()
                 .HasIndex(x => x.PrintDate).IsUnique();
-            modelBuilder.Entity<Puzzle>()
+            modelBuilder.Entity<CategoriesPuzzle>()
                 .Ignore(x => x.NextPrintDate);
-            modelBuilder.Entity<Puzzle>()
+            modelBuilder.Entity<CategoriesPuzzle>()
                 .Ignore(x => x.PrevPrintDate);
 
 

@@ -2,7 +2,7 @@
 
 namespace ConnectionsAPI.Database.Entities
 {
-    public class Puzzle
+    public class CategoriesPuzzle
     {
         /// <summary>
         /// Primary key of the entity
@@ -37,7 +37,7 @@ namespace ConnectionsAPI.Database.Entities
         /// <summary>
         /// The categories associated with this puzzle
         /// </summary>
-        public virtual ICollection<PuzzleCategory> Categories { get; set; } = [];
+        public virtual ICollection<CategoriesCategory> Categories { get; set; } = [];
 
         [NotMapped]
         public string? PrevPrintDate { get; set; }

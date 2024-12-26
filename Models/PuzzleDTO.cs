@@ -2,7 +2,7 @@
 {
     public class PuzzleDTO
     {
-        public static PuzzleDTO FromEntity(Database.Entities.Puzzle dbPuzzle) =>
+        public static PuzzleDTO FromEntity(Database.Entities.CategoriesPuzzle dbPuzzle) =>
             new()
             {
                 PuzzleNumber = dbPuzzle.Index,
@@ -25,11 +25,11 @@
 
     public class PuzzleCategoryDTO
     {
-        public static PuzzleCategoryDTO FromEntity(Database.Entities.PuzzleCategory dbCategory) =>
+        public static PuzzleCategoryDTO FromEntity(Database.Entities.CategoriesCategory dbCategory) =>
             new()
             {
                 Title = dbCategory.Name,
-                Cards = dbCategory.PuzzleCards.OrderBy(x => x.Content).Select(PuzzleCardDTO.FromEntity).ToList(),
+                Cards = dbCategory.CategoriesPuzzleCards.OrderBy(x => x.Content).Select(PuzzleCardDTO.FromEntity).ToList(),
                 Color = dbCategory.Color.ToString().ToLower(),
                 OrderingKey = (int)dbCategory.Color
             };
@@ -42,7 +42,7 @@
 
     public class PuzzleCardDTO
     {
-        public static PuzzleCardDTO FromEntity(Database.Entities.PuzzleCard dbCard) =>
+        public static PuzzleCardDTO FromEntity(Database.Entities.CategoriesCard dbCard) =>
             new()
             {
                 Content = dbCard.Content,
