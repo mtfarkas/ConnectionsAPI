@@ -1,4 +1,5 @@
 ﻿using ConnectionsAPI.Database.Entities;
+using ConnectionsAPI.Models.Response;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConnectionsAPI.Database.Repository;
@@ -32,11 +33,25 @@ public class PuzzleRepository(ConnectionsContext _db)
         return puzzle;
     }
 
-    public async Task<IEnumerable<ConnectionsPuzzle>> GetAllConnectionsAsync(bool includeSolutions = true)
+    public async Task<PagedDataResponse<ConnectionsPuzzle>> QueryConnectionsPuzzles(int page,
+                                                                                    int pageCount,
+                                                                                    int? year,
+                                                                                    int? month,
+                                                                                    bool includeSolutions = true)
     {
-        // query all, ordered by print date
         var query = _db.ConnectionsPuzzles
             .AsNoTracking();
+
+        if (year != null)
+        {
+            string filterStr = $"{year}-%";
+            if (month != null)
+            {
+                filterStr = $"{year}-{month.ToString()!.PadLeft(2, '0')}-%";
+            }
+
+            query = query.Where(x => EF.Functions.Like(x.PrintDate, filterStr));
+        }
 
         if (includeSolutions)
         {
@@ -45,14 +60,24 @@ public class PuzzleRepository(ConnectionsContext _db)
                 .ThenInclude(x => x.Cards);
         }
 
-        var result = (await query.OrderBy(x => x.PrintDate).ToListAsync()) ?? [];
+        query = query
+            .OrderBy(x => x.PrintDate)
+            .Skip((page - 1) * pageCount)
+            .Take(pageCount);
 
-        foreach (var puzzle in result)
+        var puzzles = await query.ToListAsync();
+
+        if (puzzles.Count > 0)
         {
-            await EnhanceConnectionsWithDatesAsync(puzzle);
+            foreach (var puzzle in puzzles)
+            {
+                await EnhanceConnectionsWithDatesAsync(puzzle);
+            }
         }
 
-        return result;
+        int totalCount = await _db.ConnectionsPuzzles.AsNoTracking().CountAsync();
+
+        return new PagedDataResponse<ConnectionsPuzzle>(page, puzzles.Count, totalCount, puzzles);
     }
 
     private async Task EnhanceConnectionsWithDatesAsync(ConnectionsPuzzle puzzle)

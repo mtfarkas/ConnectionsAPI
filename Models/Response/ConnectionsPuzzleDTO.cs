@@ -11,7 +11,7 @@ public class ConnectionsPuzzleDTO
             NextPuzzle = dbPuzzle.NextPrintDate ?? string.Empty,
             PreviousPuzzle = dbPuzzle.PrevPrintDate ?? string.Empty,
 
-            Categories = dbPuzzle.Categories.OrderBy(x => (int)x.Color).Select(PuzzleCategoryDTO.FromEntity).ToList(),
+            Categories = dbPuzzle.Categories.OrderBy(x => (int)x.Color).Select(ConnectionsCategoryDTO.FromEntity).ToList(),
         };
 
     public int PuzzleNumber { get; set; }
@@ -19,16 +19,16 @@ public class ConnectionsPuzzleDTO
     public string PreviousPuzzle { get; set; } = string.Empty;
     public string NextPuzzle { get; set; } = string.Empty;
     public string Editor { get; set; } = string.Empty;
-    public ICollection<PuzzleCategoryDTO> Categories { get; set; } = [];
+    public ICollection<ConnectionsCategoryDTO> Categories { get; set; } = [];
 }
 
-public class PuzzleCategoryDTO
+public class ConnectionsCategoryDTO
 {
-    public static PuzzleCategoryDTO FromEntity(Database.Entities.ConnectionsCategory dbCategory) =>
+    public static ConnectionsCategoryDTO FromEntity(Database.Entities.ConnectionsCategory dbCategory) =>
         new()
         {
             Title = dbCategory.Name,
-            Cards = dbCategory.Cards.OrderBy(x => x.Content).Select(PuzzleCardDTO.FromEntity).ToList(),
+            Cards = dbCategory.Cards.OrderBy(x => x.Content).Select(ConnectionsCardDTO.FromEntity).ToList(),
             Color = dbCategory.Color.ToString().ToLower(),
             OrderingKey = (int)dbCategory.Color
         };
@@ -36,12 +36,12 @@ public class PuzzleCategoryDTO
     public string Title { get; set; } = string.Empty;
     public string Color { get; set; } = string.Empty;
     public int OrderingKey { get; set; }
-    public ICollection<PuzzleCardDTO> Cards { get; set; } = [];
+    public ICollection<ConnectionsCardDTO> Cards { get; set; } = [];
 }
 
-public class PuzzleCardDTO
+public class ConnectionsCardDTO
 {
-    public static PuzzleCardDTO FromEntity(Database.Entities.ConnectionsCard dbCard) =>
+    public static ConnectionsCardDTO FromEntity(Database.Entities.ConnectionsCard dbCard) =>
         new()
         {
             Content = dbCard.Content,
